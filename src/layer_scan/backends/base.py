@@ -1,5 +1,3 @@
-"""Abstract backend interface for layer-scan."""
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

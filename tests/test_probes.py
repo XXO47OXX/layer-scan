@@ -1,5 +1,3 @@
-"""Tests for evaluation probes."""
-
 import json
 import tempfile
 from pathlib import Path

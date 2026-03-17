@@ -1,5 +1,3 @@
-"""Tests for vLLM backend (mocked — no actual vLLM required)."""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -12,7 +10,6 @@ from layer_scan.config import DuplicationConfig
 
 class TestVLLMBackendImport:
     def test_import_error_without_vllm(self):
-        """VLLMBackend.load() raises ImportError when vllm not installed."""
         from layer_scan.backends.vllm_backend import VLLMBackend
 
         backend = VLLMBackend()
@@ -21,7 +18,6 @@ class TestVLLMBackendImport:
                 backend.load("test-model")
 
     def test_class_instantiates(self):
-        """VLLMBackend can be instantiated without vllm installed."""
         from layer_scan.backends.vllm_backend import VLLMBackend
 
         backend = VLLMBackend()

@@ -1,5 +1,3 @@
-"""Tests for the scanning engine."""
-
 from unittest.mock import MagicMock
 
 import torch
@@ -46,12 +44,10 @@ class TestGenerateConfigs:
             assert cfg.duplicated_count >= 10
 
     def test_small_model(self):
-        """Model with fewer layers than min_block_size → no configs."""
         configs = _generate_configs(5, min_block_size=7, step=1, skip_early=0, skip_late=0)
         assert len(configs) == 0
 
     def test_config_count_formula(self):
-        """For total=10, min_block=7, step=1: i in [0,1,2,3], j depends on i."""
         configs = _generate_configs(10, min_block_size=7, step=1, skip_early=0, skip_late=0)
         # i=0: j in [7,8,9,10] → 4 configs
         # i=1: j in [8,9,10] → 3 configs
@@ -77,7 +73,6 @@ class TestScannerIntegration:
     """Integration tests with mock backend."""
 
     def test_scan_report_structure(self):
-        """Verify scan produces a well-structured report."""
         from layer_scan.probes.math_probe import MathProbe
         from layer_scan.scanner import run_scan
 

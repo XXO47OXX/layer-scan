@@ -1,5 +1,3 @@
-"""Backend white-box tests — verify internal logic with mocks, no GPU."""
-
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,7 +16,6 @@ class TestTransformersBackendFindLayers:
         return backend
 
     def test_llama_style_layers(self):
-        """model.layers (LLaMA/Mistral/Qwen2)."""
         model = MagicMock()
         layers = [MagicMock() for _ in range(32)]
         model.model.layers = layers
@@ -29,7 +26,6 @@ class TestTransformersBackendFindLayers:
         assert len(found) == 32
 
     def test_gpt2_style_layers(self):
-        """transformer.h (GPT-2, GPT-Neo)."""
         model = MagicMock()
         del model.model
         layers = [MagicMock() for _ in range(12)]
@@ -42,7 +38,6 @@ class TestTransformersBackendFindLayers:
         assert len(found) == 12
 
     def test_gpt_neox_style_layers(self):
-        """gpt_neox.layers (GPT-NeoX, Pythia)."""
         model = MagicMock()
         del model.model
         del model.transformer
@@ -54,7 +49,6 @@ class TestTransformersBackendFindLayers:
         assert len(found) == 24
 
     def test_mpt_style_layers(self):
-        """transformer.blocks (MPT)."""
         model = MagicMock()
         del model.model
         del model.gpt_neox
@@ -67,7 +61,6 @@ class TestTransformersBackendFindLayers:
         assert len(found) == 16
 
     def test_opt_style_layers(self):
-        """model.decoder.layers (OPT)."""
         model = MagicMock()
         del model.model.layers
         del model.transformer
@@ -80,7 +73,6 @@ class TestTransformersBackendFindLayers:
         assert len(found) == 20
 
     def test_unknown_architecture_raises(self):
-        """No recognized layer container → RuntimeError."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         model = MagicMock(spec=[])  # No attributes at all
         backend = TransformersBackend()
@@ -93,7 +85,6 @@ class TestTransformersBackendForward:
     """Test forward pass logic."""
 
     def test_baseline_uses_standard_forward(self):
-        """forward_with_duplication(config=None) calls model directly."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         backend = TransformersBackend()
         backend._tokenizer = MagicMock()
@@ -113,7 +104,6 @@ class TestTransformersBackendForward:
         backend._model.assert_called_once()
 
     def test_duplicated_forward_calls_layers_in_order(self):
-        """forward_with_duplication with config executes layers in correct order."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         backend = TransformersBackend()
 
@@ -159,7 +149,6 @@ class TestTransformersBackendForward:
         assert result.shape == (100,)
 
     def test_forward_duplicated_unknown_embedding_raises(self):
-        """_forward_duplicated with no recognized embedding → RuntimeError."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         backend = TransformersBackend()
         backend._model = MagicMock(spec=[])  # No model or transformer attr
@@ -176,21 +165,18 @@ class TestTransformersBackendLifecycle:
     """Test load/cleanup lifecycle."""
 
     def test_get_total_layers_not_loaded(self):
-        """get_total_layers before load → RuntimeError."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         backend = TransformersBackend()
         with pytest.raises(RuntimeError, match="not loaded"):
             backend.get_total_layers()
 
     def test_get_tokenizer_not_loaded(self):
-        """get_tokenizer before load → RuntimeError."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         backend = TransformersBackend()
         with pytest.raises(RuntimeError, match="not loaded"):
             backend.get_tokenizer()
 
     def test_cleanup_releases_resources(self):
-        """cleanup() sets model and tokenizer to None."""
         from layer_scan.backends.transformers_backend import TransformersBackend
         backend = TransformersBackend()
         backend._model = MagicMock()
@@ -210,7 +196,6 @@ class TestExLlamaV2Backend:
     """ExLlamaV2 backend tests."""
 
     def test_count_decoder_layers(self):
-        """_count_decoder_layers counts Attention modules."""
         from layer_scan.backends.exllamav2 import ExLlamaV2Backend
         backend = ExLlamaV2Backend()
 
@@ -236,7 +221,6 @@ class TestExLlamaV2Backend:
         assert backend._count_decoder_layers() == 5
 
     def test_get_layer_module_map(self):
-        """_get_layer_module_map maps Attention+MLP to layer indices."""
         from layer_scan.backends.exllamav2 import ExLlamaV2Backend
         backend = ExLlamaV2Backend()
 
@@ -269,7 +253,6 @@ class TestExLlamaV2Backend:
         assert layer_map[2] == [5, 6]
 
     def test_get_post_layer_modules(self):
-        """_get_post_layer_modules finds norm/head after last MLP."""
         from layer_scan.backends.exllamav2 import ExLlamaV2Backend
         backend = ExLlamaV2Backend()
 
@@ -297,21 +280,18 @@ class TestExLlamaV2Backend:
         assert post == [3, 4]  # norm and head indices
 
     def test_get_total_layers_not_loaded(self):
-        """get_total_layers before load → RuntimeError."""
         from layer_scan.backends.exllamav2 import ExLlamaV2Backend
         backend = ExLlamaV2Backend()
         with pytest.raises(RuntimeError, match="not loaded"):
             backend.get_total_layers()
 
     def test_get_tokenizer_not_loaded(self):
-        """get_tokenizer before load → RuntimeError."""
         from layer_scan.backends.exllamav2 import ExLlamaV2Backend
         backend = ExLlamaV2Backend()
         with pytest.raises(RuntimeError, match="not loaded"):
             backend.get_tokenizer()
 
     def test_load_without_exllamav2_raises(self):
-        """load() without exllamav2 installed → ImportError."""
         from layer_scan.backends.exllamav2 import ExLlamaV2Backend
         backend = ExLlamaV2Backend()
         with pytest.raises(ImportError, match="ExLlamaV2 not installed"):
@@ -322,7 +302,6 @@ class TestExLlamaV2TokenizerAdapter:
     """Test the tokenizer adapter."""
 
     def test_encode_tensor_to_list(self):
-        """encode converts tensor output to list[int]."""
         from layer_scan.backends.exllamav2 import _ExLlamaV2TokenizerAdapter
 
         mock_tokenizer = MagicMock()
@@ -334,7 +313,6 @@ class TestExLlamaV2TokenizerAdapter:
         assert isinstance(result, list)
 
     def test_encode_list_input(self):
-        """encode handles list-like output."""
         from layer_scan.backends.exllamav2 import _ExLlamaV2TokenizerAdapter
 
         mock_tokenizer = MagicMock()

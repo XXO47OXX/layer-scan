@@ -1,5 +1,3 @@
-"""Tests for pre-computed lookup module."""
-
 from __future__ import annotations
 
 import sys

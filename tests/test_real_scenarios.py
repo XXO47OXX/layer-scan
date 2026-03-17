@@ -1,5 +1,3 @@
-"""Real-world scenario tests -- end-to-end with mock models."""
-
 from unittest.mock import MagicMock
 
 import pytest
@@ -14,7 +12,6 @@ class TestQwen2StyleModel:
 
     @pytest.mark.integration
     def test_full_scan_report(self, mock_tokenizer):
-        """80-layer model + math probe -> complete report."""
         from layer_scan.probes.math_probe import MathProbe
 
         backend = MagicMock()
@@ -47,7 +44,6 @@ class TestSmallModel:
 
     @pytest.mark.integration
     def test_8_layers_min_block_7(self, mock_tokenizer):
-        """8 layers, min_block=7 -> very few configs."""
         from layer_scan.probes.math_probe import MathProbe
 
         backend = MagicMock()
@@ -71,7 +67,6 @@ class TestSmallModel:
 class TestSparseFirst:
     @pytest.mark.integration
     def test_sparse_fewer_configs(self, mock_tokenizer):
-        """sparse_first=True -> fewer configs than full scan."""
         from layer_scan.probes.math_probe import MathProbe
 
         backend = MagicMock()
@@ -96,7 +91,6 @@ class TestSparseFirst:
 class TestCustomProbeScenario:
     @pytest.mark.integration
     def test_custom_probe_scan(self, mock_tokenizer, sample_probe_json):
-        """Custom JSON probe -> end-to-end scan."""
         from layer_scan.probes.custom import CustomProbe
 
         backend = MagicMock()
@@ -121,7 +115,6 @@ class TestCustomProbeScenario:
 class TestMergekitExport:
     @pytest.mark.integration
     def test_export_valid_yaml(self, sample_scan_report):
-        """mergekit YAML export produces valid YAML structure."""
         from layer_scan.export import export_mergekit_yaml
 
         yaml_str = export_mergekit_yaml(sample_scan_report, "test-model")
@@ -132,7 +125,6 @@ class TestMergekitExport:
 
     @pytest.mark.integration
     def test_export_rank_selection(self, sample_scan_report):
-        """Different ranks produce different YAML configs."""
         from layer_scan.export import export_mergekit_yaml
 
         yaml1 = export_mergekit_yaml(sample_scan_report, "model", rank=1)
@@ -141,7 +133,6 @@ class TestMergekitExport:
 
     @pytest.mark.integration
     def test_export_invalid_rank(self, sample_scan_report):
-        """Invalid rank -> ValueError."""
         from layer_scan.export import export_mergekit_yaml
 
         with pytest.raises(ValueError, match="rank"):
@@ -151,8 +142,6 @@ class TestMergekitExport:
 
     @pytest.mark.integration
     def test_export_empty_report(self):
-        """Empty top_configs -> ValueError."""
-
         from layer_scan.export import export_mergekit_yaml
 
         report = MagicMock()
@@ -165,7 +154,6 @@ class TestMergekitExport:
 class TestMultiProbeComparison:
     @pytest.mark.integration
     def test_different_probes_different_results(self, mock_tokenizer):
-        """math vs json probes -> potentially different top configs."""
         from layer_scan.probes.json_probe import JsonProbe
         from layer_scan.probes.math_probe import MathProbe
 
@@ -196,7 +184,6 @@ class TestMultiProbeComparison:
 class TestBaselineScore:
     @pytest.mark.integration
     def test_baseline_is_no_duplication(self, mock_tokenizer):
-        """Baseline score = forward with no duplication config."""
         from layer_scan.probes.math_probe import MathProbe
 
         baseline_calls = []
@@ -221,7 +208,6 @@ class TestBaselineScore:
 
 class TestBackendReload:
     def test_cleanup_then_reuse(self, mock_tokenizer):
-        """cleanup() followed by reconfiguration -> works."""
         backend = MagicMock()
         backend.get_total_layers.return_value = 10
         backend.get_tokenizer.return_value = mock_tokenizer

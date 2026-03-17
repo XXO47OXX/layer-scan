@@ -1,5 +1,3 @@
-"""Tests for logit distribution scoring."""
-
 import numpy as np
 import pytest
 import torch
@@ -9,7 +7,6 @@ from layer_scan.scoring import ScoreResult, aggregate_scores, score_from_logits
 
 class TestScoreFromLogits:
     def test_uniform_distribution(self):
-        """Uniform logits → expected score is mean of values."""
         logits = torch.zeros(100)  # vocab size 100
         token_ids = list(range(10))  # tokens 0-9
         values = list(range(10))  # values 0-9
@@ -25,7 +22,6 @@ class TestScoreFromLogits:
             assert abs(p - 0.1) < 0.01
 
     def test_peaked_distribution(self):
-        """One token has much higher logit → score approaches that value."""
         logits = torch.zeros(100)
         token_ids = list(range(10))
         values = list(range(10))
@@ -39,7 +35,6 @@ class TestScoreFromLogits:
         assert result.uncertainty < 0.1
 
     def test_bimodal_distribution(self):
-        """Two peaks → intermediate expected score, high uncertainty."""
         logits = torch.zeros(100)
         token_ids = list(range(10))
         values = list(range(10))
@@ -53,7 +48,6 @@ class TestScoreFromLogits:
         assert result.uncertainty > 10  # high variance
 
     def test_custom_values(self):
-        """Custom score values (not 0-9)."""
         logits = torch.zeros(50)
         token_ids = [10, 20, 30]
         values = [1.0, 5.0, 10.0]
@@ -81,7 +75,6 @@ class TestScoreFromLogits:
         assert isinstance(result.raw_logits, list)
 
     def test_default_values(self):
-        """When score_values is None, defaults to [0, 1, ..., n-1]."""
         logits = torch.zeros(100)
         token_ids = list(range(5))
 

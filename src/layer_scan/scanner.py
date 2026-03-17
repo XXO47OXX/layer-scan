@@ -31,16 +31,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ScanReport:
-    """Complete report from a scan run.
-
-    Args:
-        scan_config: The configuration used for this scan.
-        results: All individual (i, j) results.
-        baseline_score: Score of the unmodified model (i=j, no duplication).
-        heatmap_matrix: 2D numpy array of scores indexed by (i, j).
-        top_configs: Top-k best configurations.
-        total_time_seconds: Wall-clock time for the full scan.
-    """
+    """Complete report from a scan run."""
 
     scan_config: ScanConfig
     results: list[ScanResult]

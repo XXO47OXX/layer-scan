@@ -1,4 +1,3 @@
-"""Tests for cross-tool annotation."""
 import json
 
 import pytest

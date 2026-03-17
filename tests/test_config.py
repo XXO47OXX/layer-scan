@@ -1,5 +1,3 @@
-"""Tests for layer-scan configuration."""
-
 import pytest
 
 from layer_scan.config import DuplicationConfig, ScanConfig, ScanResult

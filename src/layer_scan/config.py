@@ -1,5 +1,3 @@
-"""Model configuration and layer duplication parameters."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -7,17 +5,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class DuplicationConfig:
-    """A single layer duplication configuration (i, j).
-
-    Execution order: [0...j-1, i...N-1]
-    where layers [i...j-1] are executed twice.
-
-    Args:
-        i: Start of duplicated block (inclusive). Must be <= j.
-        j: End of duplicated block (exclusive). The forward pass runs
-           layers [0..j-1] then jumps back to layer i and continues [i..N-1].
-        total_layers: Total number of layers in the base model.
-    """
+    """A single layer duplication configuration (i, j)."""
 
     i: int
     j: int
@@ -49,20 +37,7 @@ class DuplicationConfig:
 
 @dataclass(frozen=True)
 class ScanConfig:
-    """Configuration for a full scan run.
-
-    Args:
-        model_path: Path to the model directory or HuggingFace model ID.
-        probe_name: Name of the evaluation probe to use.
-        min_block_size: Minimum duplicated block size (layers). Default 7
-            based on RYS finding that <7 layers is ineffective.
-        step: Step size for scanning i and j. Default 1 for exhaustive.
-        skip_early: Number of early layers to skip (input translation region).
-        skip_late: Number of late layers to skip (output formatting region).
-        gpu_memory_limit: Max GPU memory in GB. 0 = no limit.
-        batch_size: Number of probe samples per evaluation.
-        output_dir: Directory for results output.
-    """
+    """Configuration for a full scan run."""
 
     model_path: str
     probe_name: str = "math"
@@ -95,17 +70,7 @@ class ScanConfig:
 
 @dataclass(frozen=True)
 class ScanResult:
-    """Result of evaluating a single (i, j) configuration.
-
-    Args:
-        config: The duplication configuration tested.
-        score: Aggregate score from the probe (higher is better).
-        uncertainty: Variance of the score estimate.
-        per_sample_scores: Individual scores for each probe sample.
-        log_odds: Mean log-odds of correct answer (None if no annotations).
-        accuracy: Fraction of samples where argmax == correct (None if N/A).
-        metadata: Additional info (latency, memory usage, etc.).
-    """
+    """Result of evaluating a single (i, j) configuration."""
 
     config: DuplicationConfig
     score: float

@@ -22,16 +22,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class MultiProbeResult:
-    """Result of multi-probe evaluation for a single (i, j) config.
-
-    Args:
-        config: The duplication configuration.
-        probe_scores: Dict mapping probe_name -> score.
-        probe_log_odds: Dict mapping probe_name -> log_odds (if available).
-        probe_accuracies: Dict mapping probe_name -> accuracy (if available).
-        normalized_score: Geometric mean of per-probe normalized scores.
-        is_pareto_optimal: Whether this config is on the Pareto frontier.
-    """
+    """Result of multi-probe evaluation for a single (i, j) config."""
 
     config: DuplicationConfig
     probe_scores: dict[str, float]
@@ -43,15 +34,7 @@ class MultiProbeResult:
 
 @dataclass
 class MultiProbeReport:
-    """Complete multi-probe analysis report.
-
-    Args:
-        probe_names: List of probes used.
-        all_results: All evaluated configs with per-probe scores.
-        pareto_configs: Configs on the Pareto frontier.
-        best_balanced: The config with highest normalized score.
-        per_probe_best: Dict of probe_name -> best config for that probe.
-    """
+    """Complete multi-probe analysis report."""
 
     probe_names: list[str]
     all_results: list[MultiProbeResult]

@@ -1,5 +1,3 @@
-"""Boundary and edge-case tests."""
-
 import math
 
 import pytest
@@ -11,14 +9,12 @@ from layer_scan.scoring import score_from_logits
 
 class TestDuplicationConfigBoundaries:
     def test_zero_duplication(self):
-        """i=0, j=0 → no layers duplicated."""
         cfg = DuplicationConfig(i=0, j=0, total_layers=10)
         assert cfg.duplicated_count == 0
         assert cfg.effective_depth == 10
         assert cfg.execution_order() == list(range(10))
 
     def test_full_model_duplication(self):
-        """i=0, j=total → entire model duplicated."""
         cfg = DuplicationConfig(i=0, j=10, total_layers=10)
         assert cfg.duplicated_count == 10
         assert cfg.effective_depth == 20
@@ -26,33 +22,28 @@ class TestDuplicationConfigBoundaries:
         assert order == list(range(10)) + list(range(10))
 
     def test_single_layer_model(self):
-        """total_layers=1 → valid configs possible."""
         cfg = DuplicationConfig(i=0, j=1, total_layers=1)
         assert cfg.duplicated_count == 1
         assert cfg.effective_depth == 2
         assert cfg.execution_order() == [0, 0]
 
     def test_single_layer_no_dup(self):
-        """total_layers=1, i=j=0 → no dup."""
         cfg = DuplicationConfig(i=0, j=0, total_layers=1)
         assert cfg.execution_order() == [0]
 
     def test_single_layer_end_no_dup(self):
-        """total_layers=1, i=j=1 → no dup."""
         cfg = DuplicationConfig(i=1, j=1, total_layers=1)
         assert cfg.execution_order() == [0]
 
 
 class TestScoringBoundaries:
     def test_uniform_logits(self):
-        """All-zero logits → uniform distribution → score ≈ 4.5."""
         logits = torch.zeros(100)
         token_ids = list(range(10))
         result = score_from_logits(logits, token_ids)
         assert abs(result.expected_score - 4.5) < 0.01
 
     def test_logits_with_nan(self):
-        """NaN in logits → NaN in score (propagates)."""
         logits = torch.zeros(100)
         logits[0] = float("nan")
         token_ids = list(range(10))
@@ -60,7 +51,6 @@ class TestScoringBoundaries:
         assert math.isnan(result.expected_score)
 
     def test_logits_with_positive_inf(self):
-        """+Inf at one position → all probability on that token."""
         logits = torch.zeros(100)
         logits[5] = float("inf")
         token_ids = list(range(10))
@@ -69,7 +59,6 @@ class TestScoringBoundaries:
         assert abs(result.expected_score - 5.0) < 0.01
 
     def test_logits_with_negative_inf(self):
-        """-Inf at one position → zero probability on that token."""
         logits = torch.zeros(100)
         logits[3] = float("-inf")
         token_ids = list(range(10))
@@ -80,14 +69,12 @@ class TestScoringBoundaries:
         assert abs(result.expected_score - expected) < 0.1
 
     def test_empty_score_token_ids(self):
-        """Empty token ID list → error (softmax over empty)."""
         logits = torch.zeros(100)
         with pytest.raises((ValueError, RuntimeError)):
             score_from_logits(logits, [])
 
     @pytest.mark.parametrize("dtype", [torch.float16, torch.float32])
     def test_float_precision(self, dtype):
-        """float16 vs float32 → results should be close."""
         torch.manual_seed(42)
         logits = torch.randn(100, dtype=dtype)
         token_ids = list(range(10))
@@ -95,7 +82,6 @@ class TestScoringBoundaries:
         assert 0.0 <= result.expected_score <= 9.0
 
     def test_very_large_logits(self):
-        """Very large logits → doesn't overflow."""
         logits = torch.full((100,), 1000.0)
         logits[7] = 1001.0  # Slightly higher
         token_ids = list(range(10))
@@ -126,7 +112,6 @@ class TestScanConfigValidation:
             ScanConfig(model_path="m", top_k=0)
 
     def test_valid_minimum_values(self):
-        """All minimum valid values (1) should work."""
         cfg = ScanConfig(
             model_path="m",
             batch_size=1,
@@ -139,7 +124,6 @@ class TestScanConfigValidation:
 
 class TestGenerateConfigsBoundaries:
     def test_skip_early_late_exceeds_total(self):
-        """skip_early + skip_late >= total → empty config list."""
         from layer_scan.scanner import _generate_configs
         configs = _generate_configs(
             total_layers=20,
@@ -151,7 +135,6 @@ class TestGenerateConfigsBoundaries:
         assert len(configs) == 0
 
     def test_min_block_exceeds_available(self):
-        """min_block > available range → empty config list."""
         from layer_scan.scanner import _generate_configs
         configs = _generate_configs(
             total_layers=10,

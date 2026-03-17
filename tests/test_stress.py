@@ -1,5 +1,3 @@
-"""Stress and performance tests — marked slow, CI optional."""
-
 import time
 import tracemalloc
 from unittest.mock import MagicMock
@@ -15,7 +13,6 @@ from layer_scan.scanner import ScanReport, _generate_configs
 @pytest.mark.slow
 class TestStress:
     def test_large_config_scan_completes(self, mock_backend_16_layers):
-        """1000+ configs with mock backend completes in <30s."""
         from layer_scan.probes.math_probe import MathProbe
         from layer_scan.scanner import run_scan
 
@@ -36,7 +33,6 @@ class TestStress:
         assert elapsed < 30
 
     def test_large_batch_memory(self):
-        """Large batch_size doesn't exceed memory threshold."""
         tracemalloc.start()
 
         configs = _generate_configs(
@@ -56,7 +52,6 @@ class TestStress:
         assert peak < 50 * 1024 * 1024
 
     def test_100_layer_model_configs(self):
-        """100-layer model full scan → correct config count, no overflow."""
         configs = _generate_configs(
             total_layers=100,
             min_block_size=7,
@@ -80,7 +75,6 @@ class TestStress:
             assert cfg.duplicated_count >= 7
 
     def test_heatmap_100x100(self, tmp_path):
-        """100x100 heatmap HTML generates in <5s."""
         from layer_scan.heatmap import generate_heatmap
 
         total = 100
@@ -112,7 +106,6 @@ class TestStress:
         assert elapsed < 5.0
 
     def test_sequential_backend_calls_no_leak(self):
-        """Multiple sequential calls to same backend → no state leak."""
         backend = MagicMock()
         backend.get_total_layers.return_value = 10
 
